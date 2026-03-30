@@ -1,0 +1,1148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JNV Birthday Tracker 🎓✨</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;600;700&family=Tiro+Devanagari+Hindi&family=Share+Tech+Mono&family=Fredoka+One&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #1a0a2e;
+    --chalk: #f5f0e8;
+    --saffron: #ff6b00;
+    --green: #00a86b;
+    --sky: #007bbd;
+    --gold: #ffd700;
+    --pink: #e91e8c;
+    --board: #2d5a27;
+    --board-dark: #1e3d1a;
+    --paper: #fdf6e3;
+    --rust: #b5451b;
+    --neon-cyan: #00ffe7;
+    --neon-pink: #ff2d78;
+    --card-bg: rgba(255,255,255,0.06);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Rajdhani', sans-serif;
+    background: var(--ink);
+    color: var(--chalk);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* STAR FIELD */
+  #stars {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 0;
+    background: radial-gradient(ellipse at 20% 50%, #16002e 0%, #0a0015 60%, #000 100%);
+  }
+  .star {
+    position: absolute; border-radius: 50%; background: #fff;
+    animation: twinkle 3s infinite alternate;
+  }
+  @keyframes twinkle { 0%{opacity:0.2;transform:scale(1)} 100%{opacity:1;transform:scale(1.3)} }
+
+  /* CHALK DUST PARTICLES */
+  .chalk-dust {
+    position: fixed; pointer-events: none; z-index: 1;
+    width: 4px; height: 4px; border-radius: 50%;
+    background: rgba(245,240,232,0.3);
+    animation: floatUp 8s linear infinite;
+  }
+  @keyframes floatUp {
+    0%{transform:translateY(100vh) rotate(0deg);opacity:0}
+    10%{opacity:0.6}
+    90%{opacity:0.3}
+    100%{transform:translateY(-10vh) rotate(720deg);opacity:0}
+  }
+
+  /* HEADER */
+  header {
+    position: relative; z-index: 10;
+    background: linear-gradient(135deg, var(--board-dark) 0%, var(--board) 40%, #3a7a34 70%, var(--board-dark) 100%);
+    border-bottom: 8px solid #5d4037;
+    padding: 0;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.8);
+    overflow: hidden;
+  }
+  .header-chalk-lines {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: repeating-linear-gradient(
+      90deg, transparent, transparent 60px,
+      rgba(255,255,255,0.015) 60px, rgba(255,255,255,0.015) 61px
+    );
+  }
+  .header-inner {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center;
+    padding: 30px 20px 20px;
+    gap: 8px;
+  }
+  .school-badge {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: radial-gradient(circle, var(--gold) 0%, var(--saffron) 60%, var(--rust) 100%);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    border: 3px solid var(--gold);
+    box-shadow: 0 0 20px rgba(255,215,0,0.6), 0 0 60px rgba(255,107,0,0.3);
+    font-size: 28px;
+    animation: badgePulse 3s ease-in-out infinite;
+    margin-bottom: 8px;
+  }
+  @keyframes badgePulse {
+    0%,100%{box-shadow:0 0 20px rgba(255,215,0,0.6),0 0 60px rgba(255,107,0,0.3)}
+    50%{box-shadow:0 0 35px rgba(255,215,0,0.9),0 0 80px rgba(255,107,0,0.5)}
+  }
+  .header-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.6rem, 5vw, 3rem);
+    color: var(--gold);
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.5), 0 0 30px rgba(255,215,0,0.4);
+    letter-spacing: 2px;
+    text-align: center;
+  }
+  .header-subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--neon-cyan);
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    opacity: 0.85;
+  }
+  .header-tagline {
+    font-size: 1rem;
+    color: rgba(245,240,232,0.7);
+    font-style: italic;
+    text-align: center;
+  }
+  .neon-divider {
+    width: 80%; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--neon-cyan), var(--saffron), var(--neon-pink), transparent);
+    margin: 10px 0;
+    animation: neonShift 4s linear infinite;
+    background-size: 200% 100%;
+  }
+  @keyframes neonShift { 0%{background-position:0%} 100%{background-position:200%} }
+
+  /* UPCOMING BIRTHDAYS TICKER */
+  .ticker-wrap {
+    position: relative; z-index: 10;
+    background: linear-gradient(90deg, var(--saffron), #ff8c00, var(--saffron));
+    padding: 8px 0;
+    overflow: hidden;
+    border-bottom: 3px solid var(--rust);
+  }
+  .ticker-inner {
+    display: flex; gap: 0;
+    animation: tickerMove 30s linear infinite;
+    white-space: nowrap;
+  }
+  .ticker-item {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--ink);
+    font-weight: 700;
+    padding: 0 30px;
+  }
+  @keyframes tickerMove { 0%{transform:translateX(0)} 100%{transform:translateX(-50%)} }
+
+  /* MAIN LAYOUT */
+  main {
+    position: relative; z-index: 5;
+    max-width: 1200px; margin: 0 auto;
+    padding: 30px 15px 60px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+
+  /* SECTION HEADERS */
+  .section-label {
+    display: flex; align-items: center; gap: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .section-label::before, .section-label::after {
+    content: ''; flex: 1; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--neon-cyan));
+  }
+  .section-label::after { background: linear-gradient(90deg, var(--neon-cyan), transparent); }
+
+  /* CARD BASE */
+  .glass-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.07);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .glass-card:hover { box-shadow: 0 12px 48px rgba(0,0,0,0.5); }
+
+  /* TODAY'S BIRTHDAY */
+  #todaySection {
+    background: linear-gradient(135deg, rgba(255,107,0,0.2), rgba(233,30,140,0.15));
+    border: 1px solid rgba(255,107,0,0.4);
+    border-radius: 20px;
+    padding: 20px;
+    text-align: center;
+    display: none;
+  }
+  #todaySection.active { display: block; animation: birthdayGlow 2s ease-in-out infinite alternate; }
+  @keyframes birthdayGlow {
+    0%{box-shadow:0 0 20px rgba(255,107,0,0.4)}
+    100%{box-shadow:0 0 50px rgba(255,107,0,0.8),0 0 100px rgba(233,30,140,0.3)}
+  }
+
+  /* ADD FORM */
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .form-group { display: flex; flex-direction: column; gap: 6px; }
+  .form-group label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 2px;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+  }
+  .form-group input, .form-group select {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--chalk);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .form-group input:focus, .form-group select:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 12px rgba(0,255,231,0.2);
+  }
+  .form-group input::placeholder { color: rgba(245,240,232,0.3); }
+  .form-group select option { background: #1a0a2e; color: var(--chalk); }
+
+  .btn-add {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: linear-gradient(135deg, var(--saffron), var(--pink));
+    border: none; border-radius: 10px;
+    padding: 12px 28px;
+    color: #fff; font-family: 'Fredoka One', cursive; font-size: 1.1rem;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(255,107,0,0.4);
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .btn-add:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(255,107,0,0.6); }
+
+  /* SEARCH & FILTER */
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+    margin-bottom: 20px;
+  }
+  .search-box {
+    flex: 1; min-width: 200px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    padding: 10px 14px;
+    color: var(--chalk);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1rem;
+    outline: none;
+    transition: border-color 0.3s;
+  }
+  .search-box:focus { border-color: var(--neon-cyan); }
+  .search-box::placeholder { color: rgba(245,240,232,0.3); }
+  .filter-btn {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px; padding: 10px 16px;
+    color: var(--chalk); cursor: pointer;
+    font-family: 'Rajdhani', sans-serif; font-size: 0.9rem;
+    transition: all 0.2s;
+  }
+  .filter-btn.active { background: var(--sky); border-color: var(--sky); }
+  .filter-btn:hover { border-color: var(--neon-cyan); }
+
+  /* CLASSMATE CARDS */
+  #birthdayGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+  }
+
+  .classmate-card {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 20px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+    cursor: default;
+    animation: cardIn 0.4s ease forwards;
+  }
+  @keyframes cardIn {
+    from{opacity:0;transform:translateY(20px)}
+    to{opacity:1;transform:translateY(0)}
+  }
+  .classmate-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--saffron), var(--green), var(--sky));
+  }
+  .classmate-card.today-birthday::before {
+    background: linear-gradient(90deg, var(--gold), var(--pink), var(--gold));
+    animation: rainbowLine 2s linear infinite;
+  }
+  @keyframes rainbowLine { 0%{background-position:0%} 100%{background-position:200%} }
+  .classmate-card.today-birthday {
+    border-color: rgba(255,215,0,0.4);
+    box-shadow: 0 0 30px rgba(255,215,0,0.2);
+  }
+  .classmate-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(0,0,0,0.5); }
+
+  .card-top {
+    display: flex; align-items: flex-start; gap: 14px; margin-bottom: 14px;
+  }
+  .avatar {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; font-weight: 700;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+  .card-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    color: var(--chalk);
+    line-height: 1.2;
+  }
+  .card-dob {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--gold);
+    margin-top: 2px;
+  }
+  .card-place {
+    font-size: 0.8rem;
+    color: rgba(245,240,232,0.5);
+    font-style: italic;
+  }
+  .birthday-badge {
+    position: absolute; top: 14px; right: 14px;
+    background: linear-gradient(135deg, var(--gold), var(--saffron));
+    border-radius: 20px; padding: 3px 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem; color: var(--ink); font-weight: 700;
+    letter-spacing: 1px;
+  }
+
+  .card-details {
+    display: flex; flex-direction: column; gap: 6px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding-top: 12px;
+    margin-top: 4px;
+  }
+  .detail-row {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 0.85rem; color: rgba(245,240,232,0.65);
+  }
+  .detail-row .icon { font-size: 0.9rem; width: 18px; text-align: center; }
+
+  .countdown-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    background: rgba(0,255,231,0.1);
+    border: 1px solid rgba(0,255,231,0.2);
+    border-radius: 20px; padding: 4px 10px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem; color: var(--neon-cyan);
+    margin-top: 8px;
+  }
+
+  /* WISH BUTTONS */
+  .wish-actions {
+    display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap;
+  }
+  .wish-btn {
+    flex: 1; min-width: 100px;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    border: none; border-radius: 8px; padding: 8px 12px;
+    font-family: 'Rajdhani', sans-serif; font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; transition: all 0.2s; text-decoration: none;
+    color: #fff;
+  }
+  .wish-btn.whatsapp {
+    background: linear-gradient(135deg, #25d366, #128c7e);
+    box-shadow: 0 4px 14px rgba(37,211,102,0.3);
+  }
+  .wish-btn.whatsapp:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(37,211,102,0.5); }
+  .wish-btn.email {
+    background: linear-gradient(135deg, var(--sky), #0055a4);
+    box-shadow: 0 4px 14px rgba(0,123,189,0.3);
+  }
+  .wish-btn.email:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0,123,189,0.5); }
+  .wish-btn.gcal {
+    background: linear-gradient(135deg, #ea4335, #fbbc05);
+    box-shadow: 0 4px 14px rgba(234,67,53,0.3);
+  }
+  .wish-btn.gcal:hover { transform: translateY(-2px); }
+  .wish-btn.del {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    flex: 0; padding: 8px 10px;
+    color: rgba(255,255,255,0.4);
+  }
+  .wish-btn.del:hover { background: rgba(255,50,50,0.2); color: #ff5555; border-color: #ff5555; }
+
+  /* CALENDAR EMBED SECTION */
+  .calendar-section {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .gcal-info {
+    background: rgba(0,255,231,0.05);
+    border: 1px solid rgba(0,255,231,0.15);
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-top: 16px;
+  }
+  .gcal-info h4 { color: var(--neon-cyan); margin-bottom: 10px; font-size: 1rem; }
+  .gcal-info ol { padding-left: 20px; color: rgba(245,240,232,0.7); font-size: 0.9rem; line-height: 2; }
+  .gcal-info code {
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px; padding: 2px 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.8rem; color: var(--gold);
+  }
+
+  /* STATS */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 16px;
+  }
+  .stat-box {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; padding: 18px;
+    text-align: center;
+    transition: transform 0.2s;
+  }
+  .stat-box:hover { transform: translateY(-3px); }
+  .stat-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2rem;
+    color: var(--gold);
+    display: block;
+  }
+  .stat-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 2px;
+    color: rgba(245,240,232,0.5);
+    text-transform: uppercase;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    grid-column: 1/-1;
+    text-align: center; padding: 60px 20px;
+    color: rgba(245,240,232,0.3);
+  }
+  .empty-state .big-emoji { font-size: 4rem; margin-bottom: 16px; display: block; }
+  .empty-state p { font-family: 'Share Tech Mono', monospace; font-size: 0.85rem; letter-spacing: 2px; }
+
+  /* TOAST */
+  #toast {
+    position: fixed; bottom: 30px; right: 30px; z-index: 9999;
+    background: linear-gradient(135deg, var(--board), #3a7a34);
+    border: 1px solid var(--green);
+    border-radius: 12px; padding: 14px 22px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.85rem; color: var(--chalk);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    transform: translateY(100px); opacity: 0;
+    transition: all 0.4s cubic-bezier(0.34,1.56,0.64,1);
+  }
+  #toast.show { transform: translateY(0); opacity: 1; }
+
+  /* CONFETTI */
+  .confetti-piece {
+    position: fixed; width: 8px; height: 8px;
+    pointer-events: none; z-index: 9998;
+    border-radius: 2px;
+    animation: confettiFall 3s ease-in forwards;
+  }
+  @keyframes confettiFall {
+    0%{transform:translateY(-10px) rotate(0deg);opacity:1}
+    100%{transform:translateY(100vh) rotate(720deg);opacity:0}
+  }
+
+  /* MONTH TABS */
+  .month-tabs {
+    display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px;
+  }
+  .month-tab {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; padding: 5px 14px;
+    font-size: 0.8rem; cursor: pointer;
+    transition: all 0.2s; color: rgba(245,240,232,0.7);
+    font-family: 'Rajdhani', sans-serif; font-weight: 600;
+  }
+  .month-tab.active { background: var(--saffron); border-color: var(--saffron); color: #fff; }
+  .month-tab:hover { border-color: var(--saffron); }
+
+  /* EXPORT SECTION */
+  .export-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+  .export-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px; padding: 9px 18px;
+    color: var(--chalk); cursor: pointer;
+    font-family: 'Rajdhani', sans-serif; font-size: 0.9rem; font-weight: 600;
+    transition: all 0.2s;
+  }
+  .export-btn:hover { border-color: var(--neon-cyan); color: var(--neon-cyan); }
+
+  /* FOOTER */
+  footer {
+    position: relative; z-index: 5;
+    text-align: center; padding: 30px 20px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.7rem;
+    color: rgba(245,240,232,0.3);
+    letter-spacing: 2px;
+    line-height: 2;
+  }
+
+  /* CHALK BOARD TEXTURE OVERLAY */
+  .board-texture {
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; z-index: 1;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.4;
+  }
+
+  /* RESPONSIVE */
+  @media(max-width:600px) {
+    .form-grid { grid-template-columns: 1fr; }
+    .stats-row { grid-template-columns: repeat(2,1fr); }
+    #birthdayGrid { grid-template-columns: 1fr; }
+    .wish-actions { gap: 6px; }
+    .wish-btn { font-size: 0.75rem; padding: 7px 8px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stars"></div>
+<div class="board-texture"></div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-chalk-lines"></div>
+  <div class="header-inner">
+    <div class="school-badge">🏫</div>
+    <h1 class="header-title">JNV Birthday Tracker</h1>
+    <div class="neon-divider"></div>
+    <div class="header-subtitle">📡 Navodaya Vidyalaya • Since 1986 • Always Connected</div>
+    <p class="header-tagline">"Chalk on board, memories in heart — forever JNVians 🎓"</p>
+    <div class="neon-divider"></div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:0.7rem;color:var(--neon-cyan);letter-spacing:3px;" id="liveTime"></div>
+  </div>
+</header>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-inner" id="tickerInner">
+    <!-- Filled by JS -->
+  </div>
+</div>
+
+<main>
+
+  <!-- STATS -->
+  <div>
+    <div class="section-label">📊 Class Statistics</div>
+    <div class="stats-row">
+      <div class="stat-box">
+        <span class="stat-num" id="statTotal">0</span>
+        <span class="stat-label">Total Classmates</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-num" id="statToday">0</span>
+        <span class="stat-label">Birthday Today</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-num" id="statMonth">0</span>
+        <span class="stat-label">This Month</span>
+      </div>
+      <div class="stat-box">
+        <span class="stat-num" id="statNext">—</span>
+        <span class="stat-label">Next Birthday In</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TODAY'S BIRTHDAY -->
+  <div id="todaySection" class="glass-card">
+    <div style="font-size:3rem;margin-bottom:10px;">🎂🎉🎊</div>
+    <div id="todayContent"></div>
+  </div>
+
+  <!-- ADD CLASSMATE -->
+  <div class="glass-card">
+    <div class="section-label">✏️ Add Classmate</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="inpName" placeholder="Rajesh Kumar" />
+      </div>
+      <div class="form-group">
+        <label>Date of Birth *</label>
+        <input type="date" id="inpDob" />
+      </div>
+      <div class="form-group">
+        <label>Mobile Number</label>
+        <input type="tel" id="inpMobile" placeholder="+91 98765 43210" />
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="inpEmail" placeholder="rajesh@gmail.com" />
+      </div>
+      <div class="form-group">
+        <label>Place of Birth (Optional)</label>
+        <input type="text" id="inpPlace" placeholder="Lucknow, UP" />
+      </div>
+      <div class="form-group">
+        <label>JNV / Batch</label>
+        <input type="text" id="inpBatch" placeholder="JNV Meerut • 1993" />
+      </div>
+    </div>
+    <div style="margin-top:20px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+      <button class="btn-add" onclick="addClassmate()">
+        ➕ Add to Class Register
+      </button>
+      <label style="font-size:0.8rem;color:rgba(245,240,232,0.5);cursor:pointer;">
+        <input type="file" id="importJson" accept=".json" style="display:none" onchange="importData(event)">
+        📂 Import JSON Backup
+      </label>
+    </div>
+  </div>
+
+  <!-- BIRTHDAY LIST -->
+  <div>
+    <div class="section-label">🎂 Class Birthday Register</div>
+
+    <!-- Controls -->
+    <div class="controls">
+      <input type="text" class="search-box" placeholder="🔍  Search classmates..." oninput="renderCards()" id="searchBox">
+      <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn" onclick="setFilter('today',this)">Today 🎂</button>
+      <button class="filter-btn" onclick="setFilter('week',this)">This Week</button>
+      <button class="filter-btn" onclick="setFilter('month',this)">This Month</button>
+    </div>
+
+    <!-- Month Tabs -->
+    <div class="month-tabs" id="monthTabs"></div>
+
+    <!-- Cards -->
+    <div id="birthdayGrid"></div>
+  </div>
+
+  <!-- GOOGLE CALENDAR & EMBED INFO -->
+  <div class="calendar-section">
+    <div class="section-label">📅 Google Calendar & Embedding</div>
+
+    <div class="gcal-info">
+      <h4>📲 How to Add to Google Calendar</h4>
+      <ol>
+        <li>Click <strong>"Add to Google Calendar"</strong> on any classmate card below.</li>
+        <li>Sign into Google → Click <strong>"Save"</strong> — it auto-sets as a yearly recurring event!</li>
+        <li>Enable <strong>Notifications</strong> (1 day before) in Google Calendar settings.</li>
+        <li>You'll get email + phone push reminders automatically every year. ✅</li>
+      </ol>
+    </div>
+
+    <div class="gcal-info" style="margin-top:12px;border-color:rgba(255,215,0,0.15);">
+      <h4 style="color:var(--gold);">🌐 Embed This Page on Free Websites</h4>
+      <ol>
+        <li>Save this HTML file and host it FREE on <code>GitHub Pages</code>, <code>Netlify</code>, or <code>Tiiny.host</code>.</li>
+        <li>For <strong>GitHub Pages</strong>: Push file to a repo → Settings → Pages → Enable. Done!</li>
+        <li>For <strong>Netlify</strong>: Drag-drop the HTML file at <code>netlify.com/drop</code> → Instant live link 🚀</li>
+        <li>Share the link with all JNVians — everyone uses the same live page, anytime, anywhere! 📱</li>
+        <li>Data is saved in browser localStorage — use the <strong>Export JSON</strong> button to share/backup the classmate list.</li>
+      </ol>
+    </div>
+
+    <div style="margin-top:16px;">
+      <div style="font-size:0.9rem;color:rgba(245,240,232,0.6);margin-bottom:8px;">📦 Data Management</div>
+      <div class="export-actions">
+        <button class="export-btn" onclick="exportJSON()">⬇️ Export JSON Backup</button>
+        <button class="export-btn" onclick="exportICS()">📅 Export .ICS Calendar File</button>
+        <button class="export-btn" onclick="copyShareLink()">🔗 Copy Share Info</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  🎓 JNV Birthday Tracker • Made with ❤️ for Navodaya Vidyalaya Alumni<br>
+  Memories from Chalk & Blackboard to Pixels & AI • Always a JNVian 🇮🇳
+</footer>
+
+<div id="toast">✅ Done!</div>
+
+<script>
+// ===================== DATA =====================
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const AVATAR_COLORS = [
+  ['#ff6b00','#1a0a2e'], ['#00a86b','#fff'], ['#007bbd','#fff'],
+  ['#e91e8c','#fff'], ['#ffd700','#1a0a2e'], ['#9c27b0','#fff'],
+  ['#00ffe7','#1a0a2e'], ['#ff2d78','#fff'], ['#4caf50','#fff'],
+  ['#ff5722','#fff'], ['#2196f3','#fff'], ['#795548','#fff']
+];
+
+let classmates = JSON.parse(localStorage.getItem('jnv_classmates') || '[]');
+let activeFilter = 'all';
+let activeMonth = null;
+
+// Demo data if empty
+if (classmates.length === 0) {
+  classmates = [
+    { id: 1, name: 'Anita Sharma', dob: '1980-03-30', mobile: '+91 98765 43210', email: 'anita.sharma@gmail.com', place: 'Varanasi, UP', batch: 'JNV Meerut • 1996' },
+    { id: 2, name: 'Suresh Yadav', dob: '1981-04-15', mobile: '+91 87654 32109', email: 'suresh.yadav@gmail.com', place: 'Allahabad, UP', batch: 'JNV Meerut • 1997' },
+    { id: 3, name: 'Priya Gupta', dob: '1982-12-05', mobile: '+91 76543 21098', email: 'priya.gupta@gmail.com', place: 'Agra, UP', batch: 'JNV Meerut • 1998' },
+    { id: 4, name: 'Rakesh Singh', dob: '1983-07-22', mobile: '+91 65432 10987', email: 'rakesh.singh@gmail.com', place: 'Lucknow, UP', batch: 'JNV Meerut • 1999' },
+    { id: 5, name: 'Meena Kumari', dob: '1980-01-10', mobile: '+91 54321 09876', email: 'meena.kumari@gmail.com', place: 'Kanpur, UP', batch: 'JNV Meerut • 1996' },
+  ];
+  saveData();
+}
+
+function saveData() {
+  localStorage.setItem('jnv_classmates', JSON.stringify(classmates));
+}
+
+// ===================== STARS & ATMOSPHERE =====================
+(function initStars() {
+  const container = document.getElementById('stars');
+  for (let i = 0; i < 120; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.5 + 0.5;
+    s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-delay:${Math.random()*4}s;animation-duration:${2+Math.random()*4}s`;
+    container.appendChild(s);
+  }
+})();
+
+(function initChalkDust() {
+  for (let i = 0; i < 8; i++) {
+    const d = document.createElement('div');
+    d.className = 'chalk-dust';
+    d.style.cssText = `left:${Math.random()*100}%;animation-delay:${Math.random()*8}s;animation-duration:${6+Math.random()*6}s`;
+    document.body.appendChild(d);
+  }
+})();
+
+// ===================== CLOCK =====================
+function updateClock() {
+  const now = new Date();
+  const opts = { weekday:'long', year:'numeric', month:'long', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' };
+  document.getElementById('liveTime').textContent = now.toLocaleString('en-IN', opts);
+}
+setInterval(updateClock, 1000); updateClock();
+
+// ===================== HELPERS =====================
+function getAge(dob) {
+  const b = new Date(dob), now = new Date();
+  let age = now.getFullYear() - b.getFullYear();
+  if (now < new Date(now.getFullYear(), b.getMonth(), b.getDate())) age--;
+  return age;
+}
+
+function getDaysUntilBirthday(dob) {
+  const now = new Date();
+  const b = new Date(dob);
+  const next = new Date(now.getFullYear(), b.getMonth(), b.getDate());
+  if (next < now || (next.toDateString() === now.toDateString())) {
+    if (next.toDateString() === now.toDateString()) return 0;
+    next.setFullYear(now.getFullYear() + 1);
+  }
+  const diff = Math.round((next - now) / 86400000);
+  return diff;
+}
+
+function isBirthdayToday(dob) {
+  const now = new Date(), b = new Date(dob);
+  return now.getMonth() === b.getMonth() && now.getDate() === b.getDate();
+}
+
+function isBirthdayThisWeek(dob) {
+  const days = getDaysUntilBirthday(dob);
+  return days <= 7;
+}
+
+function isBirthdayThisMonth(dob) {
+  const b = new Date(dob);
+  return b.getMonth() === new Date().getMonth();
+}
+
+function getInitials(name) {
+  return name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+}
+
+function getAvatarColors(index) {
+  return AVATAR_COLORS[index % AVATAR_COLORS.length];
+}
+
+function formatDate(dob) {
+  const b = new Date(dob);
+  return b.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+// ===================== WISH MESSAGES =====================
+function generateWishMessage(name, age) {
+  const msgs = [
+    `🎂🎉 Happy Birthday ${name} didi/bhai! 🎊 Wishing you a day as bright as your JNV days! May this ${age}th birthday bring you tonnes of joy, success, and wonderful memories. From your JNVian family with ❤️`,
+    `🌟✨ Jai hind ${name}! 🎂 Another trip around the sun completed! ${age} looks great on you. May your birthday be filled with the same laughter we shared in our school corridors. Happy Birthday! 🎊🏫`,
+    `🎈🎁 Hey ${name}! It's your special day! 🎂 ${age} years of awesomeness! Wishing you health, happiness and all the delicious food (remember the mess ke dosas?? 😄). Happy Birthday from your JNV gang! 🙏✨`,
+    `🎊🎉 Dear ${name}, Happy Birthday! 🎂 May this year bring you the same magic we felt during our JNV days. ${age} years young and still glowing! Loads of love from your Navodaya parivaar ❤️🏫`
+  ];
+  return msgs[Math.floor(Math.random() * msgs.length)];
+}
+
+// ===================== WISH ACTIONS =====================
+function sendWhatsApp(mobile, name, dob) {
+  const age = getAge(dob) + 1;
+  const msg = encodeURIComponent(generateWishMessage(name, age));
+  const cleaned = mobile.replace(/\D/g, '');
+  const num = cleaned.startsWith('91') ? cleaned : '91' + cleaned;
+  window.open(`https://wa.me/${num}?text=${msg}`, '_blank');
+}
+
+function sendEmail(email, name, dob) {
+  const age = getAge(dob) + 1;
+  const subject = encodeURIComponent(`🎂 Happy ${age}th Birthday ${name}! - From Your JNV Family`);
+  const body = encodeURIComponent(generateWishMessage(name, age) + '\n\nWith warm regards,\nYour JNVian Classmates 🏫');
+  window.open(`mailto:${email}?subject=${subject}&body=${body}`, '_blank');
+}
+
+function addToGoogleCalendar(name, dob) {
+  const b = new Date(dob);
+  const y = new Date().getFullYear();
+  const pad = n => String(n).padStart(2,'0');
+  const dates = `${y}${pad(b.getMonth()+1)}${pad(b.getDate())}/${y}${pad(b.getMonth()+1)}${pad(b.getDate())}`;
+  const title = encodeURIComponent(`🎂 ${name}'s Birthday`);
+  const details = encodeURIComponent(`Happy Birthday to our dear JNVian ${name}! 🎉 Don't forget to send wishes!`);
+  window.open(`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${dates}&details=${details}&recur=RRULE:FREQ=YEARLY`, '_blank');
+  showToast('📅 Google Calendar opened!');
+}
+
+// ===================== ADD CLASSMATE =====================
+function addClassmate() {
+  const name = document.getElementById('inpName').value.trim();
+  const dob = document.getElementById('inpDob').value;
+  const mobile = document.getElementById('inpMobile').value.trim();
+  const email = document.getElementById('inpEmail').value.trim();
+  const place = document.getElementById('inpPlace').value.trim();
+  const batch = document.getElementById('inpBatch').value.trim();
+
+  if (!name || !dob) { showToast('⚠️ Name and Date of Birth are required!'); return; }
+
+  const newOne = {
+    id: Date.now(),
+    name, dob, mobile, email, place, batch
+  };
+
+  classmates.push(newOne);
+  saveData();
+
+  // Clear
+  ['inpName','inpDob','inpMobile','inpEmail','inpPlace','inpBatch'].forEach(id => document.getElementById(id).value = '');
+
+  renderAll();
+  showToast(`✅ ${name} added to the class register!`);
+
+  if (isBirthdayToday(dob)) {
+    confetti(); showToast(`🎂 HAPPY BIRTHDAY ${name.split(' ')[0].toUpperCase()}! 🎉`);
+  }
+}
+
+// ===================== DELETE =====================
+function deleteClassmate(id) {
+  if (!confirm('Remove this classmate from the register?')) return;
+  classmates = classmates.filter(c => c.id !== id);
+  saveData(); renderAll();
+  showToast('🗑️ Removed from register.');
+}
+
+// ===================== FILTER =====================
+function setFilter(f, btn) {
+  activeFilter = f; activeMonth = null;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.month-tab').forEach(t => t.classList.remove('active'));
+  renderCards();
+}
+
+function setMonthFilter(m, el) {
+  activeMonth = m; activeFilter = 'all';
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.month-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderCards();
+}
+
+// ===================== RENDER =====================
+function renderAll() {
+  renderStats();
+  renderTodayBirthday();
+  renderMonthTabs();
+  renderCards();
+  renderTicker();
+}
+
+function renderStats() {
+  const now = new Date();
+  document.getElementById('statTotal').textContent = classmates.length;
+  document.getElementById('statToday').textContent = classmates.filter(c => isBirthdayToday(c.dob)).length;
+  document.getElementById('statMonth').textContent = classmates.filter(c => isBirthdayThisMonth(c.dob)).length;
+
+  const sorted = [...classmates].filter(c => !isBirthdayToday(c.dob))
+    .sort((a,b) => getDaysUntilBirthday(a.dob) - getDaysUntilBirthday(b.dob));
+  if (sorted.length) {
+    const days = getDaysUntilBirthday(sorted[0].dob);
+    document.getElementById('statNext').textContent = days === 1 ? '1 day' : `${days}d`;
+  }
+}
+
+function renderTodayBirthday() {
+  const todayBirthdays = classmates.filter(c => isBirthdayToday(c.dob));
+  const sec = document.getElementById('todaySection');
+  const con = document.getElementById('todayContent');
+
+  if (todayBirthdays.length) {
+    sec.classList.add('active');
+    con.innerHTML = todayBirthdays.map(c => `
+      <div style="margin-bottom:8px;">
+        <div style="font-family:'Fredoka One',cursive;font-size:1.6rem;color:var(--gold);">${c.name}</div>
+        <div style="font-size:1rem;color:rgba(245,240,232,0.7);margin-bottom:10px;">🎂 Turns ${getAge(c.dob)+1} today! Born in ${c.place || 'India'}</div>
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+          ${c.mobile ? `<a class="wish-btn whatsapp" onclick="sendWhatsApp('${c.mobile}','${c.name}','${c.dob}')">📱 WhatsApp Wishes</a>` : ''}
+          ${c.email ? `<a class="wish-btn email" onclick="sendEmail('${c.email}','${c.name}','${c.dob}')">✉️ Email Wishes</a>` : ''}
+        </div>
+      </div>
+    `).join('<hr style="border-color:rgba(255,255,255,0.1);margin:12px 0;">');
+    confetti();
+  } else {
+    sec.classList.remove('active');
+  }
+}
+
+function renderMonthTabs() {
+  const tabs = document.getElementById('monthTabs');
+  tabs.innerHTML = MONTHS.map((m, i) => {
+    const count = classmates.filter(c => new Date(c.dob).getMonth() === i).length;
+    if (!count) return '';
+    return `<button class="month-tab ${activeMonth === i ? 'active' : ''}" onclick="setMonthFilter(${i},this)">${m} (${count})</button>`;
+  }).join('');
+}
+
+function renderCards() {
+  const grid = document.getElementById('birthdayGrid');
+  const search = document.getElementById('searchBox').value.toLowerCase();
+
+  let filtered = classmates.filter(c => {
+    const matchSearch = c.name.toLowerCase().includes(search) ||
+      (c.place||'').toLowerCase().includes(search) ||
+      (c.batch||'').toLowerCase().includes(search);
+    if (!matchSearch) return false;
+
+    if (activeMonth !== null) return new Date(c.dob).getMonth() === activeMonth;
+    if (activeFilter === 'today') return isBirthdayToday(c.dob);
+    if (activeFilter === 'week') return isBirthdayThisWeek(c.dob);
+    if (activeFilter === 'month') return isBirthdayThisMonth(c.dob);
+    return true;
+  });
+
+  // Sort by upcoming birthday
+  filtered.sort((a,b) => getDaysUntilBirthday(a.dob) - getDaysUntilBirthday(b.dob));
+
+  if (!filtered.length) {
+    grid.innerHTML = `<div class="empty-state"><span class="big-emoji">📋</span><p>No classmates found.<br>Add your first JNVian above! ✏️</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map((c, i) => {
+    const [bg, fg] = getAvatarColors(i);
+    const days = getDaysUntilBirthday(c.dob);
+    const isToday = isBirthdayToday(c.dob);
+    const age = getAge(c.dob);
+    const b = new Date(c.dob);
+
+    return `
+    <div class="classmate-card ${isToday ? 'today-birthday' : ''}">
+      ${isToday ? '<div class="birthday-badge">🎂 TODAY!</div>' : days <= 7 ? `<div class="birthday-badge" style="background:linear-gradient(135deg,var(--sky),var(--green));">📅 ${days}d away</div>` : ''}
+      <div class="card-top">
+        <div class="avatar" style="background:${bg};color:${fg};">${getInitials(c.name)}</div>
+        <div>
+          <div class="card-name">${c.name}</div>
+          <div class="card-dob">🎂 ${formatDate(c.dob)} • Age ${age}</div>
+          ${c.place ? `<div class="card-place">📍 ${c.place}</div>` : ''}
+        </div>
+      </div>
+
+      <div class="card-details">
+        ${c.batch ? `<div class="detail-row"><span class="icon">🏫</span> ${c.batch}</div>` : ''}
+        ${c.mobile ? `<div class="detail-row"><span class="icon">📱</span> ${c.mobile}</div>` : ''}
+        ${c.email ? `<div class="detail-row"><span class="icon">✉️</span> <span style="word-break:break-all;">${c.email}</span></div>` : ''}
+        <div class="detail-row"><span class="icon">📅</span> ${MONTHS[b.getMonth()]} Birthday</div>
+      </div>
+
+      <div class="countdown-pill">
+        ${isToday ? '🎉 HAPPY BIRTHDAY TODAY!' : `⏳ ${days} day${days!==1?'s':''} until birthday`}
+      </div>
+
+      <div class="wish-actions">
+        ${c.mobile ? `<a class="wish-btn whatsapp" onclick="sendWhatsApp('${c.mobile}','${c.name}','${c.dob}')">📱 WhatsApp</a>` : ''}
+        ${c.email ? `<a class="wish-btn email" onclick="sendEmail('${c.email}','${c.name}','${c.dob}')">✉️ Email</a>` : ''}
+        <a class="wish-btn gcal" onclick="addToGoogleCalendar('${c.name}','${c.dob}')">📅 Cal</a>
+        <button class="wish-btn del" onclick="deleteClassmate(${c.id})">🗑️</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTicker() {
+  const upcoming = [...classmates]
+    .sort((a,b) => getDaysUntilBirthday(a.dob) - getDaysUntilBirthday(b.dob))
+    .slice(0, 10);
+
+  const items = upcoming.map(c => {
+    const days = getDaysUntilBirthday(c.dob);
+    const label = isBirthdayToday(c.dob) ? '🎂 TODAY!' : `in ${days}d`;
+    return `<span class="ticker-item">🎉 ${c.name} — Birthday ${label}</span><span class="ticker-item">•</span>`;
+  }).join('');
+
+  const ticker = document.getElementById('tickerInner');
+  ticker.innerHTML = items + items; // duplicate for seamless loop
+}
+
+// ===================== IMPORT / EXPORT =====================
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(classmates, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'jnv_classmates_backup.json';
+  a.click();
+  showToast('⬇️ JSON backup downloaded!');
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      if (Array.isArray(data)) {
+        classmates = [...classmates, ...data.filter(d => d.name && d.dob)];
+        // Remove duplicates by name+dob
+        const seen = new Set();
+        classmates = classmates.filter(c => {
+          const key = c.name + c.dob;
+          if (seen.has(key)) return false;
+          seen.add(key); return true;
+        });
+        saveData(); renderAll();
+        showToast(`✅ Imported ${data.length} classmates!`);
+      }
+    } catch {
+      showToast('⚠️ Invalid JSON file!');
+    }
+  };
+  reader.readAsText(file);
+}
+
+function exportICS() {
+  let ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//JNV Birthday Tracker//EN\r\n`;
+  classmates.forEach(c => {
+    const b = new Date(c.dob);
+    const pad = n => String(n).padStart(2,'0');
+    const now = new Date();
+    const dtstart = `${now.getFullYear()}${pad(b.getMonth()+1)}${pad(b.getDate())}`;
+    ics += `BEGIN:VEVENT\r\nSUMMARY:🎂 ${c.name}'s Birthday\r\nDTSTART;VALUE=DATE:${dtstart}\r\nRRULE:FREQ=YEARLY\r\nDESCRIPTION:Happy Birthday ${c.name}! JNV Classmate 🏫\r\nEND:VEVENT\r\n`;
+  });
+  ics += `END:VCALENDAR`;
+  const blob = new Blob([ics], { type: 'text/calendar' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'jnv_birthdays.ics';
+  a.click();
+  showToast('📅 .ICS calendar exported! Import into Google/Apple Calendar.');
+}
+
+function copyShareLink() {
+  const text = `🎓 JNV Birthday Tracker\nKeeping our Navodaya memories alive!\n\nClassmates: ${classmates.length}\nHost this HTML file free on Netlify (netlify.com/drop) or GitHub Pages and share the link with all JNVians! 📱`;
+  navigator.clipboard.writeText(text).then(() => showToast('🔗 Info copied!'));
+}
+
+// ===================== TOAST =====================
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ===================== CONFETTI =====================
+function confetti() {
+  const colors = ['#ff6b00','#ffd700','#e91e8c','#00ffe7','#00a86b','#ff2d78'];
+  for (let i = 0; i < 40; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `
+      left:${Math.random()*100}vw;
+      top:0;
+      background:${colors[Math.floor(Math.random()*colors.length)]};
+      animation-delay:${Math.random()*2}s;
+      animation-duration:${2+Math.random()*2}s;
+      transform:rotate(${Math.random()*360}deg);
+      width:${4+Math.random()*8}px;
+      height:${4+Math.random()*8}px;
+      border-radius:${Math.random()>0.5?'50%':'2px'};
+    `;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 5000);
+  }
+}
+
+// ===================== INIT =====================
+renderAll();
+
+// Auto-refresh stats every minute
+setInterval(renderAll, 60000);
+</script>
+</body>
+</html>
